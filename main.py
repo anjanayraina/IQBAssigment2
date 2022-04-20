@@ -194,19 +194,24 @@ bet=[]
 for i in range(lengthOfSequence):
     bet.append(0)
 
+def incrementChecker(val , hb, hf):
+    return val > 3 and hb < 2 and hf > 2
 def nextBeta(seq, ind):   #will return the next index from where the alpha series will start
   for i in range(ind,lengthOfSequence-4):
     itrRange = i +1
     currentSequene=seq[itrRange -1 :itrRange +4]
     # print(currentSequene)
-    hf, hb, score=0,0,0   #number of helix former and breaker, and initialise score
+    hf = 0
+    hb = 0
+    score = 0 
+    #number of helix former and breaker, and initialise score
     for j in currentSequene:
       if otherBetaPrediction[j]  > 0:
         hf+=1
       else:
         hb+=1
       score+= otherAlphaPrediction[j]
-    if(score>3 and hb<2 and hf>2):
+    if(incrementChecker(score, hb ,hf)):
       return i
 
 
@@ -240,14 +245,15 @@ def compareBetaSelection(seq, ind, bet):    #this will take index and see before
       score+= betaPrediction[j]
     if(break2(score,  ind , i)):
       break
-    if(score<4 or i==lengthOfSequence-3):
+    if(otherBreakCondition(score , i , lengthOfSequence) ):
       id2=i
       break
   for i in range(id1, id2):
     bet[i]=1
   return id2, bet
 
-
+def otherBreakCondition(val , i , ind):
+  return val < 4 or i == ind -3
 
 def findNextBeta(seq):
   bet=[0]*lengthOfSequence
@@ -272,26 +278,37 @@ print(beta)
 
 #This is not the final answer, here we are not considering the conflicting case(this has been handled later)
 finallist=['T']*len(seq)
+
+def returnAddValue(i):
+    if(alpha[i] == 1):
+        return 'H'
+def returnOtherAddValue(i):
+    if(beta[i] == 'H'):
+        return 'S'
 for i  in range(lengthOfSequence):
   if(alpha[i]==1):
-    finallist[i]='H'
+    finallist[i]=returnAddValue(i)
   if(beta[i]==1):
-    finallist[i]='S'
+    finallist[i]=returnOtherAddValue(i)
 
 # print(finallist)
 
 #Here we are finding the indexes which has been predicted both alpha and beta by our method
 conflict=[]
 for i in range(lengthOfSequence):
-  if(alpha[i]==beta[i]==1):
+  if(alpha[i]==1 and beta[i]==1):
     conflict.append(i)
 
 print(conflict)
 
+def returnH():
+  return 'H'
+def returnS():
+  return 'S'
 
-conflictvalue= [0]*len(conflict)
+conflictvalue= [[0]*len(conflict)]
 indices=[]
-for i in range(len(conflict)-1):
+for i in range((len(conflict)+1)-2):
 
   if(conflict[i]+1== conflict[i+1] and i!= len(conflict)-2):
     indices.append(conflict[i])
@@ -306,10 +323,10 @@ for i in range(len(conflict)-1):
       sbeta+= betaPrediction[seq[j]]
     if(salpha>=sbeta):
       for k in indices:
-        finallist[k]='H'
+        finallist[k]=returnH()
     else:
       for k in indices:
-        finallist[k]='S'
+        finallist[k]=returnS()
     indices=[]
 
 print("The finallist= ", finallist)
